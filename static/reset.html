@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RESET</title>
+<style>
+    * {
+    
+    font-size: 13px;
+  }
+
+  body, html {
+    width: 100%;
+    height: 100%;
+  }
+
+  body {
+    background: #eef2f5;
+  }
+  .padding-box {
+      padding: 0 25px;
+    }
+     .box {
+      position: relative;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      box-sizing: border-box;
+      width: 300px;
+      background: #fff;
+    }
+    #send_btn, #con_submit {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      height: 30px;
+      width: 100%;
+      border: 1px solid #ddd;
+    }
+    .message-form {
+      color: #7b7b7b;
+      display: block;
+    }
+
+    .message-form > label {
+      line-height: 35px;
+      display: block;
+    }
+
+    .message-form > label > input {
+      display: block;
+      width: 100%;
+      height: 28px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #ddd;
+    }
+
+    .message-form > label > input:focus {
+      outline: 0;
+      box-shadow: 0 0 8px lightblue;
+    }
+</style>
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js">
+</script>
+<script>
+/*
+*
+*/
+var btn = $("#send_btn");
+var submit = $("con_submit");
+function sendemail(){
+    let email = document.querySelector('#email').value;
+    console.log("开始准备发送邮件 ");
+    console.log("获得的邮件地址:  "+email);
+    //sendReq('POST','/user/reset',email);
+    appPost(email);
+
+}
+
+function appPost(pram){
+    $.ajax({
+        url:'http://localhost:8080/user/reset',
+        Cache:false,
+        async:false,
+        data:pram,
+        dataType:JSON,
+        type:"POST",
+        
+        beforeSend: function(xhr){
+            console.log("现在的地址是：" + pram);
+            xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded;charset=utf-8')
+        },
+        success: function (data) {
+                console.log("成功发送的"+data);
+            }
+    })
+}
+
+
+$(function() {
+ 
+ var btn = $("#send_btn");
+ $(function() {
+     btn.click(settime);
+     btn.click(sendemail);
+ })
+ var countdown = 5;//倒计时总时间，为了演示效果，设为5秒，一般都是60s
+ function settime() {
+     if (countdown == 0) {
+         btn.attr("disabled", false);
+         document.getElementById("send_btn").value = ("重新发送");
+         btn.removeClass("disabled");
+         countdown = 5;
+         return;
+     } else {
+         btn.addClass("disabled");
+         btn.attr("disabled", true);
+         document.getElementById("send_btn").value = ("重新发送(" + countdown + ")");
+         countdown--;
+     }
+     setTimeout(settime, 1000);
+ }
+})
+
+</script>
+
+</head>
+<body>
+    <section class="box">
+  
+        <div class="padding-box">
+            
+                <form class="message-form" method="post" action="/user/reset">
+                    <label for="email">
+                      邮箱:<input type="text" id="email" name="email">
+                    </label>
+                    <input type="button" value="发送验证码"  id="send_btn">
+                    <label for="password">
+                      验证码:<input type="password" id="password" name="password">
+                    </label>
+                    <input type="submit" value="确定" id="con_submit">
+                </form>
+            
+        </div>
+    
+    </section>
+   
+</body>
+</html>

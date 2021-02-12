@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LOGIN</title>
+ 
+  <!--IMPORT CSS-->
+  <style>
+    * {
+    
+      font-size: 13px;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      background:#c9cccf;
+    }
+
+    .login-box {
+      position: relative;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      box-sizing: border-box;
+      width: 300px;
+      background: #fff;
+    }
+
+    .padding-box {
+      padding: 0 25px;
+    }
+
+    .check-l-box {
+      text-align: center;
+      height: 50px;
+      line-height: 50px;
+    }
+
+    .check-l-box > span {
+      cursor: pointer;
+    }
+
+    .check-l-box > span.mark {
+      border-bottom: 1px solid black;
+    }
+
+    /*登陆表单*/
+    .message-form {
+      color: #7b7b7b;
+      display: none;
+    }
+
+    .message-form > label {
+      line-height: 35px;
+      display: block;
+    }
+
+    .message-form > label > input {
+      display: block;
+      width: 100%;
+      height: 28px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #ddd;
+    }
+
+    .message-form > label > input:focus {
+      outline: 0;
+      box-shadow: 0 0 8px lightblue;
+    }
+
+    #login-submit, #reg-submit,#send_btn,#con_submit {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      height: 30px;
+      width: 100%;
+      border: 1px solid #ddd;
+    }
+
+    .message-form.check {
+      display: block;
+    }
+
+    .tips {
+      text-align: center;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+<section class="login-box">
+  <div class="padding-box">
+    <div class="check-l-box">
+      <span class="mark">登陆</span>
+      <span>注册</span>
+      <span>密码重置</span>
+    </div>
+    <!-- 提示: 后期发送请求返回告诉用户信息 -->
+    <p class="tips"></p>
+	<!-- 登陆表单 -->
+    <form class="message-form check" method="post" action="/user/login">
+      <label for="account">
+        用户名:<input type="text" id="account" name="account">
+      </label>
+      <label for="password">
+        密码:<input type="password" id="password" name="password">
+      </label>
+     
+      <input type="submit" value="登陆" id="login-submit">
+    </form>
+    <!-- 注册表单 -->
+    <form class="message-form" method="post" action="/user/reg">
+      <label for="reg-id">
+        工号:<input type="text" id="reg-id" name="reg_id"/>
+      </label>
+      <label for="reg-account">
+        用户名:<input type="text" id="reg-account" name="reg_account">
+      </label>
+      <label for="reg-password">
+        密码:<input type="password" id="reg-password" name="reg_password">
+      </label>
+      <label for="user-email">
+        邮箱:<input type="text" id="user-email" name="user_email"/>
+      </label>
+      <input type="button" value="注册" id="reg-submit">
+    </form>
+    <!-- 重置密码表单-->
+    <form class="message-form" method="post" action="/user/reset">
+      <label for="email">
+        邮箱:<input type="text" id="email" name="email">
+      </label>
+      <input type="button" value="发送验证码"  id="send_btn">
+      <label for="code">
+        验证码:<input type="text" id="code" name="code">
+      </label>
+      <label for="newpassword">
+        新密码：<input type="password" id = "newpassword" name = "newpassword">
+      </label>
+      <label for="newpassword2">
+        再次输入：<input type="password" id = "newpassword2" name = "newpassword2">
+      </label>
+
+      <input type="button" value="确定" id="con_submit">
+  </form>
+
+  </div>
+</section>
+
+
+<!-- IMPORT JS -->
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+<script>
+   // 登陆/注册按钮切换
+  let forms = document.querySelectorAll('.message-form'),
+      marks = document.querySelectorAll('.check-l-box>span')
+
+
+  let clearCheck = () => {
+    for (let i = 0; i < forms.length; i++) {
+      forms[i].className = 'message-form'
+      marks[i].className = ''
+    }
+  }
+  for (let i = 0; i < marks.length; i++) {
+    marks[i].addEventListener('click', function () {
+      clearCheck();
+      this.className = 'mark'
+      forms[i].className = 'message-form check'
+    }, false)
+  }
+ // 发送请求部分
+ let loginBtn = document.querySelector('#login-submit'),
+     regBtn = document.querySelector('#reg-submit'),
+     tip = document.querySelector('.tips');
+
+  // 简单封装ajax请求 封装为pomise 
+  let sendReq = (method, path, pram) => {
+    return new Promise((resolve, reject) => {
+      let xhr = new XMLHttpRequest()
+      xhr.open(method, path )
+      xhr.onreadystatechange = function () {
+        if (xhr.status === 200 && xhr.readyState === 4) {
+          resolve(xhr.responseText)
+        }
+      }
+      xhr.onerror = () => {
+        reject()
+      }
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8')
+      //pram = JSON.stringify(pram);
+      
+      console.log("这是即将要发送的parm："+pram);
+    //   pram= eval('('+pram+')');
+     // console.log("看看这个能不能转：        "+pram);
+      xhr.send(pram)
+    })
+  }
+
+  loginBtn.onclick = function (ev) {
+    let account = document.querySelector('#account'),
+        password = document.querySelector('#password'),
+        par = 'account' + '=' + account.value + '&' + 'password' + '=' + password.value;
+    console.log(par);
+    sendReq('POST', '/user/login', par).then(res => {
+      // 密码正确跳转，没有正确则显示错误信息
+      try {
+        res = JSON.parse(res)
+        res.code === 0 ? tip.innerText = res.message : location.href = 'http://localhost:8080';
+      } catch (e) {
+        location.href = 'http://localhost:8080';
+      }
+    })
+    ev.preventDefault()
+  }
+
+  regBtn.onclick = function (ev) {
+    let userid = document.querySelector('#reg-id'),
+        account = document.querySelector('#reg-account'),
+        password = document.querySelector('#reg-password'),
+        email = document.querySelector('#user-email'),
+
+        par = 'userid' + '=' + userid.value + '&' +'account' + '=' + account.value + '&' + 'password' + '=' + password.value + '&email=' + email.value;
+    sendReq('POST', '/user/reg', par).then(res => {
+      let {code, message} = JSON.parse(res);
+      console.log("deng~deng~deng~deng~"+JSON.parse(res));
+      tip.innerText = message
+      if (code === 1) {
+        clearCheck()
+        marks[0].className = 'mark'
+        forms[0].className = 'message-form check'
+      }
+    })
+    ev.preventDefault()
+  }
+
+  /*
+*发送邮件
+*/
+var btn = $("#send_btn");
+var submit = $("con_submit");
+function sendemail(){
+    let email = document.querySelector('#email').value;
+    console.log("开始准备发送邮件 ");
+    console.log("获得的邮件地址:  "+email);
+    let emailAddr = 'email' + '=' + email;
+    console.log("即将发送的报文:  "+emailAddr);
+    sendReq('POST', '/user/reset', emailAddr);
+}
+/*
+* 验证
+*/
+function check(){
+  let a = checkPass();
+  console.log("a    :" +a);
+  if(a == true){
+    
+    checkCode();
+  }else if(a == false){
+    
+  }
+
+}
+
+/*
+*验证验证码
+*/
+function checkCode(){
+  let code = document.querySelector('#code').value;
+  let newPass = document.querySelector('#newpassword').value;
+  let email = document.querySelector('#email').value;
+  console.log("这里的验证码为：  "+code);
+  console.log("这里输入的新密码为：   "+newPass);
+  let codepar = 'code' + '=' + code +'&'+ 'newPass' + '=' + newPass +'&'+'email'+'='+email;
+  console.log("这里要发送的验证码文本为：  "+codepar);
+  sendReq('POST', '/user/check', codepar);
+}
+/*
+*判断两次密码是否一致
+*/
+function checkPass(){
+  let val1 = document.querySelector('#newpassword').value;
+  let val2 = document.querySelector('#newpassword2').value;
+  if(val1 == ''&&val2==''){
+    alert("请输入密码");
+    return false;
+  }
+  console.log(val1 +"        " +val2);
+  if(val1 == val2){
+    
+    return true;
+  }else{
+    alert("两次密码输入不一致，请重新输入");
+    return false;
+  }
+}
+
+  $(function() {
+ var submit = $("#con_submit");
+ var btn = $("#send_btn");
+ $(function() {
+     btn.click(settime);
+     btn.click(sendemail);
+     submit.click(check);
+  
+ })
+ var countdown = 5;//倒计时总时间，为了演示效果，设为5秒，一般都是60s
+ function settime() {
+     if (countdown == 0) {
+         btn.attr("disabled", false);
+         document.getElementById("send_btn").value = ("重新发送");
+         btn.removeClass("disabled");
+         countdown = 5;
+         return;
+     } else {
+         btn.addClass("disabled");
+         btn.attr("disabled", true);
+         document.getElementById("send_btn").value = ("重新发送(" + countdown + ")");
+         countdown--;
+     }
+     setTimeout(settime, 1000);
+ }
+ 
+})
+</script>
+</body>
+</html>
